@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Frontend Redirect",
   "version": "0.1.0",
-  "description": "Redirects X, Reddit, YouTube and Imgur to privacy frontends, and keeps track of which instances are online.",
+  "description": "Redirects X, Reddit, Instagram, YouTube and Imgur to privacy frontends, and keeps track of which instances are online.",
   "permissions": ["declarativeNetRequest", "storage", "alarms"],
   "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "src/background.js", "type": "module" },

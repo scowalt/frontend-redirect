@@ -80,6 +80,10 @@ try {
   ok(`x.com/jack/status/20 → ${nitter}/jack/status/20`);
   assert.equal(await go(page, "https://old.reddit.com/r/linux/top?t=week"), `${redlib}/r/linux/top?t=week`);
   ok(`old.reddit.com/r/linux/top?t=week → ${redlib}/r/linux/top?t=week`);
+  const kittygram = await instanceFor("instagram");
+  assert.ok(kittygram, "a kittygram instance is active");
+  assert.equal(await go(page, "https://www.instagram.com/instagram/"), `${kittygram}/instagram/`);
+  ok(`instagram.com/instagram/ → ${kittygram}/instagram/`);
   assert.ok(!(await instanceFor("youtube")), "YouTube is off by default");
   ok("YouTube is off by default (no rule)");
 
@@ -147,7 +151,7 @@ try {
   await nitterPopup.locator(".choice").filter({ has: nitterPopup.locator(".host", { hasText: new URL(switchTo).host }) }).click();
   await nitterTab.waitForURL(`${switchTo}/jack`, { waitUntil: "commit", timeout: 20_000 }).catch(() => {});
   const moved = await worker.evaluate(async () => (await chrome.tabs.query({})).map((t) => t.pendingUrl || t.url));
-  assert.ok(moved.includes(`${switchTo}/jack`), `tab moved to ${switchTo}/jack (tabs: ${moved})`);
+  assert.ok(moved.some((u) => u?.startsWith(`${switchTo}/jack`)), `tab moved to ${switchTo}/jack (tabs: ${moved})`);
   ok(`picking ${new URL(switchTo).host} moves the open tab to ${switchTo}/jack`);
   await nitterPopup.getByRole("button", { name: "Open on x.com" }).click();
   await new Promise((r) => setTimeout(r, 1500));

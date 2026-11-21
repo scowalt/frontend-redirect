@@ -1,7 +1,7 @@
 # Frontend Redirect
 
-A Chrome extension that redirects X to Nitter, Reddit to Redlib, and optionally YouTube to
-Invidious and Imgur to Rimgo. It checks which public instances are online and lets you choose
+A Chrome extension that redirects X to Nitter, Reddit to Redlib, Instagram to Kittygram, and
+optionally YouTube to Invidious and Imgur to Rimgo. It checks which public instances are online and lets you choose
 one from the toolbar popup.
 
 ## Install
@@ -13,8 +13,8 @@ one from the toolbar popup.
 
 - **Instance list.** The extension fetches LibRedirect's public list
   ([libredirect/instances](https://github.com/libredirect/instances)) on startup and every 6 hours.
-- **Health checks.** It requests the home page of each instance for the services you turned on
-  and marks each one:
+- **Health checks.** For each service you turned on, it loads a real page from every instance
+  (a profile or a subreddit, not just the home page) and marks each instance:
   - **Green:** working, with the response time.
   - **Amber:** the instance shows a bot check (Anubis, Cloudflare). A normal browser usually
     gets through after a short wait.

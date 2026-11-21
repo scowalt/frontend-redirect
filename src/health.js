@@ -24,13 +24,14 @@ export function classify(status, body) {
 
 /**
  * @param {string} instance origin, e.g. "https://nitter.example"
+ * @param {string} path the content page to load, e.g. "/jack"
  * @param {number} timeoutMs
  * @returns {Promise<Health>}
  */
-export async function probe(instance, timeoutMs = 8000) {
+export async function probe(instance, path, timeoutMs = 8000) {
   const started = performance.now();
   try {
-    const res = await fetch(`${instance}/`, {
+    const res = await fetch(instance + path, {
       signal: AbortSignal.timeout(timeoutMs),
       credentials: "include",
       cache: "no-store",

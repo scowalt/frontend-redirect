@@ -39,8 +39,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
 async function probeUnchecked() {
   const [settings, local] = await Promise.all([loadSettings(), loadLocal()]);
   const unchecked = SERVICES.filter((s) => settings[s.id].enabled)
-    .flatMap((s) => instancesFor(s.id, settings, local))
-    .filter((url) => !local.health[url]);
+    .flatMap((s) => probeTargets(s, instancesFor(s.id, settings, local)))
+    .filter(([url]) => !local.health[url]);
   await probeAll(unchecked);
 }
 
@@ -94,7 +94,7 @@ function checkInstances() {
     const lists = await refreshLists();
     const [settings, local] = await Promise.all([loadSettings(), loadLocal()]);
     const enabled = SERVICES.filter((s) => settings[s.id].enabled);
-    await probeAll(enabled.flatMap((s) => instancesFor(s.id, settings, { ...local, lists })));
+    await probeAll(enabled.flatMap((s) => probeTargets(s, instancesFor(s.id, settings, { ...local, lists }))));
     await chrome.storage.local.set({ checkedAt: Date.now() });
   }).finally(() => {
     checking = null;
@@ -132,12 +132,16 @@ async function refreshLists() {
 
 let healthWrites = Promise.resolve();
 
-/** @param {string[]} instances */
-function probeAll(instances) {
-  if (instances.length === 0) return Promise.resolve();
+/** @returns {[instance: string, path: string][]} */
+const probeTargets = (service, instances) => instances.map((instance) => [instance, service.probePath]);
+
+/** @param {[instance: string, path: string][]} targets */
+function probeAll(targets) {
+  if (targets.length === 0) return Promise.resolve();
+  const unique = [...new Map(targets).entries()];
   return busy(() =>
-    forEachLimited([...new Set(instances)], PROBES_IN_FLIGHT, async (instance) => {
-      const result = await probe(instance);
+    forEachLimited(unique, PROBES_IN_FLIGHT, async ([instance, path]) => {
+      const result = await probe(instance, path);
       healthWrites = healthWrites.then(async () => {
         const { health = {} } = await chrome.storage.local.get("health");
         await chrome.storage.local.set({ health: { ...health, [instance]: result } });

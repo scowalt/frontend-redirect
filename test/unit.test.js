@@ -36,6 +36,9 @@ test("redirects pages to the same path on the instance", () => {
     "https://www.youtube.com/watch?v=abc&t=5": `${INSTANCE}/watch?v=abc&t=5`,
     "https://youtu.be/abc?t=10": `${INSTANCE}/watch?v=abc&t=10`,
     "https://i.imgur.com/abc.png": `${INSTANCE}/abc.png`,
+    "https://www.instagram.com/instagram/": `${INSTANCE}/instagram/`,
+    "https://www.instagram.com/p/Df-eXldGxRb/?img_index=1": `${INSTANCE}/p/Df-eXldGxRb/?img_index=1`,
+    "https://instagram.com/reel/Df-eXldGxRb/": `${INSTANCE}/reel/Df-eXldGxRb/`,
   };
   for (const [from, to] of Object.entries(cases)) assert.equal(navigate(from), to, from);
 });
@@ -48,6 +51,9 @@ test("leaves login, settings and other unsupported pages alone", () => {
     "https://www.reddit.com/login/",
     "https://www.reddit.com/r/linux/submit",
     "https://www.youtube.com/account",
+    "https://www.instagram.com/accounts/login/",
+    "https://www.instagram.com/stories/instagram/123/",
+    "https://www.instagram.com/explore/tags/cats/",
     "https://unrelated.example/x.com/jack",
     "https://notreddit.com/r/linux",
   ]) {
@@ -93,7 +99,7 @@ test("settings default sensibly and custom instances join the public list", () =
     lists: { nitter: ["https://n1", "https://n2"], redlib: ["https://r1"] },
     health: { "https://n1": { state: "down" }, "https://n2": { state: "up", ms: 50 } },
   });
-  assert.deepEqual(active, { nitter: "https://n2", redlib: "https://mine.example" });
+  assert.deepEqual(active, { nitter: "https://n2", redlib: "https://mine.example", kittygram: null });
 });
 
 test("instance URLs and links back to the original site", () => {
