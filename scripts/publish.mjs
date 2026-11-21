@@ -32,7 +32,6 @@ const status = () => call("GET", `${api}/v2/${item}:fetchStatus`);
 const versions = (revision) => (revision?.distributionChannels ?? []).map((c) => c.crxVersion);
 
 const before = await status();
-console.log("Store status:", JSON.stringify(before));
 if (before.takenDown) throw new Error("The item is taken down. Check the Developer Dashboard.");
 for (const [label, revision] of [
   ["published", before.publishedItemRevisionStatus],
@@ -45,7 +44,16 @@ for (const [label, revision] of [
 }
 
 console.log(`Uploading ${file} (${version})…`);
-let upload = await call("POST", `${api}/upload/v2/${item}:upload`, await readFile(file));
+// While a version is in review, fetchStatus reports no revisions, and the store refuses uploads.
+let upload;
+try {
+  upload = await call("POST", `${api}/upload/v2/${item}:upload`, await readFile(file));
+} catch (e) {
+  if (!e.message.includes("in review")) throw e;
+  console.log(`::warning::The store is still reviewing a submission, so ${version} wasn't uploaded. ` +
+    "It goes up on the next push to main after the review, or when you rerun this job.");
+  process.exit(0);
+}
 let state = upload.uploadState;
 for (let i = 0; state?.includes("IN_PROGRESS") && i < 30; i++) {
   await new Promise((r) => setTimeout(r, 5000));

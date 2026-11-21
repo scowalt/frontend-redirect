@@ -10,6 +10,10 @@ and creates a GitHub Release tagged `v<version>` with the zip attached. Pushes t
 the version release nothing. If a release fails partway, rerun the job: it skips any step that
 already finished.
 
+The store accepts no uploads while it reviews a version. A version pushed during a review gets a
+warning on the run and goes to the store on the next push to `main` after the review, or when you
+rerun the job.
+
 Chrome updates installed copies a few hours after the store approves the version.
 
 ## One-time setup
