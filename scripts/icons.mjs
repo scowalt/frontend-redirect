@@ -4,10 +4,11 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { chromePath } from "./chrome.mjs";
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <rect x="4" y="4" width="120" height="120" rx="28" fill="#2f6fed"/>
-  <path d="M30 84c0-26 18-42 46-42h10" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round"/>
-  <path d="M76 24l22 18-22 18" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="34" cy="98" r="9" fill="#fff"/>
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="#4B33C9"/>
+  <path d="M38 108V24h52v84" fill="none" stroke="#F3F0FF" stroke-width="9" stroke-linejoin="round"/>
+  <path d="M48 108V34h32v74z" fill="#FFD84D"/>
+  <path d="M48 34l-22 8v74l22-8z" fill="#F3F0FF"/>
+  <circle cx="34" cy="76" r="4.5" fill="#4B33C9"/>
 </svg>`;
 
 const browser = await chromium.launch({ executablePath: chromePath() });

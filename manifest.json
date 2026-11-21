@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Frontend Redirect",
+  "name": "Sidedoor",
   "version": "0.1.0",
-  "description": "Redirects X, Reddit, Instagram, YouTube and Imgur to privacy frontends, and keeps track of which instances are online.",
+  "description": "Lets you into X, Reddit and Instagram through Nitter, Redlib and Kittygram, and keeps track of which instances are open.",
   "permissions": ["declarativeNetRequest", "storage", "alarms"],
   "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "src/background.js", "type": "module" },

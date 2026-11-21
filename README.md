@@ -1,16 +1,20 @@
-# Frontend Redirect
+# Sidedoor
 
-[![CI](https://github.com/scowalt/frontend-redirect/actions/workflows/ci.yml/badge.svg)](https://github.com/scowalt/frontend-redirect/actions/workflows/ci.yml)
-[![Live instances](https://github.com/scowalt/frontend-redirect/actions/workflows/live.yml/badge.svg)](https://github.com/scowalt/frontend-redirect/actions/workflows/live.yml)
+<img src="icons/128.png" width="96" align="right" alt="">
 
-A Chrome extension that redirects X to Nitter, Reddit to Redlib, Instagram to Kittygram, and
+**Read X, Reddit and Instagram without the front door.**
+
+[![CI](https://github.com/scowalt/sidedoor/actions/workflows/ci.yml/badge.svg)](https://github.com/scowalt/sidedoor/actions/workflows/ci.yml)
+[![Live instances](https://github.com/scowalt/sidedoor/actions/workflows/live.yml/badge.svg)](https://github.com/scowalt/sidedoor/actions/workflows/live.yml)
+
+Sidedoor is a Chrome extension that redirects X to Nitter, Reddit to Redlib, Instagram to Kittygram, and
 optionally YouTube to Invidious and Imgur to Rimgo. It checks which public instances are online and lets you choose
 one from the toolbar popup.
 
 ## Install
 
-1. Clone this repository, or download `frontend-redirect.zip` from the latest
-   [CI run](https://github.com/scowalt/frontend-redirect/actions/workflows/ci.yml?query=branch%3Amain)
+1. Clone this repository, or download `sidedoor.zip` from the latest
+   [CI run](https://github.com/scowalt/sidedoor/actions/workflows/ci.yml?query=branch%3Amain)
    on `main` and unzip it.
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and select the folder.
@@ -51,7 +55,7 @@ npm test            # unit tests: rewrite rules, the skip list, ranking, setting
 npm run test:rules  # loads the extension in Chromium and checks that Chrome accepts every rule
 npm run e2e         # runs real redirects against live public instances
 npm run icons   # rebuilds icons/*.png
-npm run zip     # creates frontend-redirect.zip for the Chrome Web Store
+npm run zip     # creates sidedoor.zip for the Chrome Web Store
 ```
 
 CI runs `npm test` and `npm run test:rules` on every push and pull request. `npm run e2e`

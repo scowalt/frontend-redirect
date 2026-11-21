@@ -29,5 +29,5 @@ jobs:
       - run: npm run zip
       - uses: actions/upload-artifact@v7
         with:
-          name: frontend-redirect
-          path: frontend-redirect.zip
+          name: sidedoor
+          path: sidedoor.zip
