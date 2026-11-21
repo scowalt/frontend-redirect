@@ -32,6 +32,7 @@ const status = () => call("GET", `${api}/v2/${item}:fetchStatus`);
 const versions = (revision) => (revision?.distributionChannels ?? []).map((c) => c.crxVersion);
 
 const before = await status();
+console.log("Store status:", JSON.stringify(before));
 if (before.takenDown) throw new Error("The item is taken down. Check the Developer Dashboard.");
 for (const [label, revision] of [
   ["published", before.publishedItemRevisionStatus],
