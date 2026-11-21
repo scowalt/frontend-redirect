@@ -57,10 +57,11 @@ jobs:
           else
             echo "new=true" >> "$GITHUB_OUTPUT"
           fi
-      - if: steps.version.outputs.new
-        run: npm run zip
+      - run: npm run zip
+      # Runs on every push: publish.mjs skips a version the store already has, so this also
+      # checks that store auth still works, and rerunning a failed release retries the store.
       - id: gcp
-        if: steps.version.outputs.new && vars.CWS_EXTENSION_ID
+        if: vars.CWS_EXTENSION_ID
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}

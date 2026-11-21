@@ -21,8 +21,13 @@ NUMBER=$(gcloud projects describe "$PROJECT" --format='value(projectNumber)')
 gcloud iam service-accounts describe "$SA" > /dev/null 2>&1 ||
   gcloud iam service-accounts create "$SA_NAME" --display-name="Chrome Web Store publisher"
 
-gcloud iam workload-identity-pools describe github --location=global > /dev/null 2>&1 ||
-  gcloud iam workload-identity-pools create github --location=global --display-name=GitHub
+# A new project's owner can be denied this for a few minutes while IAM catches up.
+for attempt in 1 2 3 4 5 6 7 8 9 10; do
+  gcloud iam workload-identity-pools describe github --location=global > /dev/null 2>&1 && break
+  gcloud iam workload-identity-pools create github --location=global --display-name=GitHub && break
+  [ "$attempt" = 10 ] && exit 1
+  echo "Retrying in 30s..."; sleep 30
+done
 gcloud iam workload-identity-pools providers describe sidedoor --location=global --workload-identity-pool=github > /dev/null 2>&1 ||
   gcloud iam workload-identity-pools providers create-oidc sidedoor --location=global --workload-identity-pool=github \
     --issuer-uri=https://token.actions.githubusercontent.com \
