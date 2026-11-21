@@ -1,29 +1,14 @@
 // Loads the unpacked extension in Chromium, waits for the first real instance check, then
 // drives redirects, the skip list, a manual pick in the popup, and the per-tab bypass.
 // Run: npm run e2e   (SHOTS=dir saves popup screenshots there)
-import { chromium } from "playwright";
-import { mkdtemp } from "node:fs/promises";
-import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
-import { chromePath } from "../scripts/chrome.mjs";
+import { checkRulesCompile, launchExtension, ok, step } from "./browser.mjs";
 
-const root = fileURLToPath(new URL("..", import.meta.url));
 const shots = process.env.SHOTS;
-const context = await chromium.launchPersistentContext(await mkdtemp(join(tmpdir(), "fr-e2e-")), {
-  executablePath: chromePath(),
-  headless: true,
-  args: [`--disable-extensions-except=${root}`, `--load-extension=${root}`],
-  viewport: { width: 360, height: 640 },
-});
-
-const step = (name) => console.log(`\n▶ ${name}`);
-const ok = (msg) => console.log(`  ✔ ${msg}`);
+const { context, worker, id } = await launchExtension();
 
 try {
-  const worker = context.serviceWorkers()[0] ?? (await context.waitForEvent("serviceworker"));
-  const id = new URL(worker.url()).host;
   const storage = () => worker.evaluate(() => chrome.storage.local.get(null));
   const instanceFor = async (host) => {
     const rules = await worker.evaluate(() => chrome.declarativeNetRequest.getDynamicRules());
@@ -45,15 +30,7 @@ try {
     return last;
   };
 
-  step("Every rule regex compiles in Chrome");
-  const { SERVICES } = await import("../src/services.js");
-  const { buildRules } = await import("../src/state.js");
-  const allRules = buildRules(Object.fromEntries(SERVICES.map((s) => [s.id, "https://instance.example"])));
-  for (const { condition } of allRules) {
-    const result = await worker.evaluate((regex) => chrome.declarativeNetRequest.isRegexSupported({ regex }), condition.regexFilter);
-    assert.ok(result.isSupported, `${condition.regexFilter}: ${result.reason}`);
-  }
-  ok(`${allRules.length} rules`);
+  await checkRulesCompile(worker);
 
   step("First instance check");
   const started = Date.now();

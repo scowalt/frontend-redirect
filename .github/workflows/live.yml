@@ -1,0 +1,32 @@
+# Drives real redirects against live public instances. Those come and go, so this runs on a
+# schedule instead of blocking pull requests.
+name: Live instances
+
+on:
+  schedule:
+    - cron: "17 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: mkdir -p shots && npm run e2e
+        env:
+          SHOTS: shots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: popup-screenshots
+          path: shots/
