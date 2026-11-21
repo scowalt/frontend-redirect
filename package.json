@@ -1,0 +1,14 @@
+{
+  "name": "frontend-redirect",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/unit.test.js",
+    "e2e": "node test/e2e.mjs",
+    "icons": "node scripts/icons.mjs",
+    "zip": "rm -f frontend-redirect.zip && zip -qr frontend-redirect.zip manifest.json src popup icons"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}

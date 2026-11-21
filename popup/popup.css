@@ -1,0 +1,361 @@
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1c1d21;
+  --muted: #6b6f7a;
+  --line: #e6e7ea;
+  --hover: #f3f4f6;
+  --accent: #2f6fed;
+  --up: #1f9d55;
+  --challenge: #d08a00;
+  --down: #d64545;
+  --unknown: #a3a7b0;
+  font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #18191c;
+    --fg: #e8e9ec;
+    --muted: #9599a3;
+    --line: #2c2e33;
+    --hover: #222428;
+    --accent: #6f9bff;
+    --up: #3ccf7c;
+    --challenge: #f0b232;
+    --down: #ff6b6b;
+    --unknown: #5d616b;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+h1 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+}
+
+.icon:hover {
+  background: var(--hover);
+}
+
+.icon svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.checking #refresh svg {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--hover);
+  border-bottom: 1px solid var(--line);
+}
+
+#tab[hidden] {
+  display: none;
+}
+
+#tab span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.link {
+  color: var(--accent);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.service {
+  border-bottom: 1px solid var(--line);
+}
+
+.service-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+}
+
+.expand {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+}
+
+.expand:disabled {
+  cursor: default;
+}
+
+.chevron {
+  width: 10px;
+  height: 10px;
+  flex: none;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.8;
+  transition: transform 0.15s;
+}
+
+.open .chevron {
+  transform: rotate(90deg);
+}
+
+.titles {
+  min-width: 0;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.name .muted {
+  font-weight: 400;
+}
+
+.current {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--unknown);
+}
+
+.dot.up {
+  background: var(--up);
+}
+
+.dot.challenge {
+  background: var(--challenge);
+}
+
+.dot.down {
+  background: var(--down);
+}
+
+.switch {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  flex: none;
+}
+
+.switch input {
+  appearance: none;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 9px;
+  background: var(--unknown);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.switch input:checked {
+  background: var(--accent);
+}
+
+.switch input::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+
+.switch input:checked::after {
+  transform: translateX(14px);
+}
+
+.switch input:focus-visible,
+.expand:focus-visible,
+.choice:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.instances {
+  list-style: none;
+  margin: 0;
+  padding: 0 8px 6px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.choice:hover {
+  background: var(--hover);
+}
+
+.choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.choice .host {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.choice .detail {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.choice.selected {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.choice.selected .host {
+  font-weight: 600;
+}
+
+.choice.is-down .host {
+  color: var(--muted);
+}
+
+.remove {
+  color: var(--muted);
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.remove:hover {
+  color: var(--down);
+  background: var(--hover);
+}
+
+.add {
+  display: flex;
+  gap: 6px;
+  padding: 2px 16px 12px;
+}
+
+.add input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 8px;
+}
+
+.add input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.add button {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+
+.add button:hover {
+  background: var(--hover);
+}
+
+.error {
+  color: var(--down);
+  font-size: 12px;
+  padding: 0 16px 10px;
+  margin-top: -6px;
+}
