@@ -130,10 +130,9 @@ function renderService(service, settings, local, active) {
   if (!isOpen) return article;
 
   const best = rankInstances(instances, local.health).find((url) => local.health[url]?.state !== "down");
+  const autoText = !best ? "none working" : `${local.health[best]?.state === "up" ? "fastest" : "best available"} · ${host(best)}`;
   const list = el("ul", { className: "instances", role: "radiogroup" });
-  list.append(
-    choiceRow(service, "auto", config.choice === "auto", "Auto", best ? `fastest · ${host(best)}` : "none working", null),
-  );
+  list.append(choiceRow(service, "auto", config.choice === "auto", "Auto", autoText, null));
   for (const url of instances) {
     const { state, text } = describe(local.health[url]);
     list.append(

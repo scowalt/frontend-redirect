@@ -10,7 +10,8 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a release halfway through an upload.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
@@ -31,3 +32,48 @@ jobs:
         with:
           name: sidedoor
           path: sidedoor.zip
+
+  # Every push to main whose manifest version has no GitHub Release yet becomes a
+  # release: it is submitted to the Chrome Web Store (once the store is set up,
+  # see PUBLISHING.md) and attached to a GitHub Release tagged v<version>.
+  release:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      id-token: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        run: |
+          tag="v$(jq -r .version manifest.json)"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            echo "$tag is already released."
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.version.outputs.new
+        run: npm run zip
+      - id: gcp
+        if: steps.version.outputs.new && vars.CWS_EXTENSION_ID
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+      - if: steps.gcp.outcome == 'success'
+        run: node scripts/publish.mjs sidedoor.zip
+        env:
+          CWS_TOKEN: ${{ steps.gcp.outputs.access_token }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ vars.CWS_EXTENSION_ID }}
+      - if: steps.version.outputs.new
+        run: gh release create "$TAG" sidedoor.zip --target "$GITHUB_SHA" --title "Sidedoor $TAG" --generate-notes
+        env:
+          TAG: ${{ steps.version.outputs.tag }}

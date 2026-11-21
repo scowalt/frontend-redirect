@@ -13,7 +13,8 @@
     "test:rules": "node test/rules.mjs",
     "e2e": "node test/e2e.mjs",
     "icons": "node scripts/icons.mjs",
-    "zip": "rm -f sidedoor.zip && zip -qr sidedoor.zip manifest.json src popup icons LICENSE"
+    "zip": "rm -f sidedoor.zip && zip -qr sidedoor.zip manifest.json src popup icons LICENSE",
+    "store": "node scripts/store.mjs"
   },
   "devDependencies": {
     "playwright": "^1.65.1"

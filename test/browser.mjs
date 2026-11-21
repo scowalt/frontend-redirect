@@ -12,13 +12,14 @@ export const step = (name) => console.log(`\n▶ ${name}`);
 export const ok = (msg) => console.log(`  ✔ ${msg}`);
 
 /** Starts headless Chromium with the unpacked extension and returns its service worker. */
-export async function launchExtension() {
+export async function launchExtension({ deviceScaleFactor = 1 } = {}) {
   const root = fileURLToPath(new URL("..", import.meta.url));
   const context = await chromium.launchPersistentContext(await mkdtemp(join(tmpdir(), "fr-e2e-")), {
     executablePath: chromePath(),
     headless: true,
     args: [`--disable-extensions-except=${root}`, `--load-extension=${root}`],
     viewport: { width: 360, height: 640 },
+    deviceScaleFactor,
   });
   const worker = context.serviceWorkers()[0] ?? (await context.waitForEvent("serviceworker"));
   return { context, worker, id: new URL(worker.url()).host };

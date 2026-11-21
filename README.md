@@ -13,9 +13,13 @@ one from the toolbar popup.
 
 ## Install
 
-1. Clone this repository, or download `sidedoor.zip` from the latest
-   [CI run](https://github.com/scowalt/sidedoor/actions/workflows/ci.yml?query=branch%3Amain)
-   on `main` and unzip it.
+Sidedoor is on its way to the Chrome Web Store. Once it's there, install it once and Chrome sync
+adds it, with your settings, to every Chrome signed in to the same profile.
+
+Until then, or to run the latest `main`:
+
+1. Download `sidedoor.zip` from the [latest release](https://github.com/scowalt/sidedoor/releases/latest)
+   and unzip it, or clone this repository.
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and select the folder.
 
@@ -32,7 +36,7 @@ one from the toolbar popup.
 
   Click the refresh button in the popup to check again now.
 - **Choosing an instance.** By default each service is set to **Auto**, which uses the fastest
-  working instance. To use one instance every time, pick it in the popup. Your pick stays in
+  instance that's up, or one behind a bot check if none are. To use one instance every time, pick it in the popup. Your pick stays in
   use even if the instance goes down. To add an instance that isn't on the list, such as your
   own, enter its URL in the field under the list.
 - **Redirects.** Redirects use `declarativeNetRequest` rules, so a page goes straight to the
@@ -43,7 +47,7 @@ one from the toolbar popup.
   click **Resume** or close the tab.
 
 Settings are saved in `chrome.storage.sync`, so they follow your Chrome profile. Health results
-are saved only on this device.
+are saved only on this device. See the [privacy policy](PRIVACY.md).
 
 To add another frontend, add an entry to `SERVICES` in `src/services.js`.
 
@@ -56,7 +60,10 @@ npm run test:rules  # loads the extension in Chromium and checks that Chrome acc
 npm run e2e         # runs real redirects against live public instances
 npm run icons   # rebuilds icons/*.png
 npm run zip     # creates sidedoor.zip for the Chrome Web Store
+npm run store   # renders the store screenshots into store/
 ```
+
+To release, raise `version` in `manifest.json` and push to `main`. See [PUBLISHING.md](PUBLISHING.md).
 
 CI runs `npm test` and `npm run test:rules` on every push and pull request. `npm run e2e`
 depends on public instances that often go down, so it runs on a weekly schedule in the
