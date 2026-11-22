@@ -7,7 +7,7 @@
  */
 
 const CHALLENGE =
-  /just a moment|making sure you(?:&#39;|')re not a bot|checking you are not a bot|prove you(?:&#39;|')re human|verify you are human|gandalf|anubis|cf-chl|ddos-guard|challenge-platform/i;
+  /just a moment|making sure you(?:&#39;|')re not a bot|checking you are not a bot|prove you(?:&#39;|')re human|verify you are human|gandalf|anubis|cf-chl|ddos-guard|challenge-platform|bunny-shield|mod_pow_captcha|tc-challenge/i;
 
 /**
  * @param {number} status

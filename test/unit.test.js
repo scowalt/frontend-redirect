@@ -72,6 +72,9 @@ test("classify tells working instances from bot checks and failures", () => {
   assert.equal(classify(200, "<title>Nitter</title>").state, "up");
   assert.equal(classify(200, "<title>Making sure you&#39;re not a bot!</title>").state, "challenge");
   assert.equal(classify(403, "<title>Just a moment...</title>").state, "challenge");
+  assert.equal(classify(403, '<link href="/.bunny-shield/assets/challenge-styles.css" rel="stylesheet" />').state, "challenge");
+  assert.equal(classify(401, "<title>mod_pow_captcha</title>").state, "challenge");
+  assert.equal(classify(418, '<title>pow!</title> <meta name="tc-challenge" content="dac9.1795351203.14.fff9">').state, "challenge");
   assert.equal(classify(429, "Oh noes").state, "down");
   assert.equal(classify(451, "suspended").state, "down");
   assert.equal(classify(502, "").state, "down");
