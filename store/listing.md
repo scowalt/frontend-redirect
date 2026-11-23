@@ -9,13 +9,7 @@ Copy these into the Developer Dashboard. The images in this folder come from `np
 ```
 Read X, Reddit and Instagram without the front door.
 
-Sidedoor sends links to privacy-friendly frontends before the original site loads:
-
-• X (Twitter) → Nitter
-• Reddit → Redlib
-• Instagram → Kittygram
-• YouTube → Invidious (off by default)
-• Imgur → Rimgo (off by default)
+Sidedoor opens X, Reddit and Instagram links in open-source privacy frontends before the original site loads. YouTube and Imgur are supported too, and are off by default. You can turn each site on or off in the popup.
 
 Public instances come and go, so Sidedoor checks every instance every few hours by loading a real page, and picks the fastest one that works. The toolbar popup shows which instances are up, behind a bot check, or down. You can pick one yourself or add your own instance.
 
