@@ -6,8 +6,9 @@
  * - origin: where "Open original" sends you.
  * - probePath: a real content page the health check loads. Instances often serve their home page
  *   fine while every profile or post is rate limited, so "/" alone overstates health.
- * - redirects: regexFilter against the full URL, and the path appended to the chosen instance
- *   (`\1` is the first capture group, in declarativeNetRequest syntax).
+ * - redirects: the exact hosts to redirect, a regex for the rest of the URL after "host/", and the
+ *   path appended to the chosen instance (`\1` is the first capture group, in declarativeNetRequest
+ *   syntax). Each host becomes its own rule because Safari rejects regexes with alternation (`a|b`).
  * - skip: paths on the original site that the frontend can't show (login, settings, ...). Each is a
  *   regex for the leading path segments and becomes its own small rule: Chrome rejects regex rules
  *   that compile past 2 KB, which one big alternation does.
@@ -15,7 +16,7 @@
  * @typedef {{
  *   id: string, name: string, frontend: string, listKey: string, defaultEnabled: boolean,
  *   domains: string[], origin: string, probePath: string,
- *   redirects: { regex: string, to: string }[], skip: string[],
+ *   redirects: { hosts: string[], path: string, to: string }[], skip: string[],
  * }} Service
  */
 
@@ -30,7 +31,13 @@ export const SERVICES = [
     domains: ["x.com", "twitter.com"],
     origin: "https://x.com",
     probePath: "/jack",
-    redirects: [{ regex: "^https?://(?:www\\.|mobile\\.)?(?:x|twitter)\\.com/(.*)$", to: "/\\1" }],
+    redirects: [
+      {
+        hosts: ["x.com", "www.x.com", "mobile.x.com", "twitter.com", "www.twitter.com", "mobile.twitter.com"],
+        path: "(.*)",
+        to: "/\\1",
+      },
+    ],
     skip: ["i/flow", "i/oauth2", "login", "logout", "signup", "settings", "compose", "messages", "notifications", "home", "explore", "account"],
   },
   {
@@ -43,7 +50,14 @@ export const SERVICES = [
     origin: "https://www.reddit.com",
     probePath: "/r/popular",
     redirects: [
-      { regex: "^https?://(?:www\\.|old\\.|new\\.|np\\.|m\\.|amp\\.|i\\.)?reddit\\.com/(.*)$", to: "/\\1" },
+      {
+        hosts: [
+          "reddit.com", "www.reddit.com", "old.reddit.com", "new.reddit.com",
+          "np.reddit.com", "m.reddit.com", "amp.reddit.com", "i.reddit.com",
+        ],
+        path: "(.*)",
+        to: "/\\1",
+      },
     ],
     skip: [
       "login", "register", "logout", "account", "settings", "prefs", "submit", "message", "chat",
@@ -59,7 +73,13 @@ export const SERVICES = [
     domains: ["instagram.com", "instagr.am"],
     origin: "https://www.instagram.com",
     probePath: "/instagram",
-    redirects: [{ regex: "^https?://(?:www\\.|m\\.)?(?:instagram\\.com|instagr\\.am)/(.*)$", to: "/\\1" }],
+    redirects: [
+      {
+        hosts: ["instagram.com", "www.instagram.com", "m.instagram.com", "instagr.am", "www.instagr.am", "m.instagr.am"],
+        path: "(.*)",
+        to: "/\\1",
+      },
+    ],
     skip: [
       "accounts", "direct", "explore", "stories", "reels", "challenge", "emails", "about", "legal",
       "developer", "oauth", "api", "web", "privacy", "session", "graphql",
@@ -75,8 +95,8 @@ export const SERVICES = [
     origin: "https://www.youtube.com",
     probePath: "/",
     redirects: [
-      { regex: "^https?://(?:www\\.|m\\.)?youtube\\.com/(.*)$", to: "/\\1" },
-      { regex: "^https?://youtu\\.be/([^?#]+)\\??([^#]*)", to: "/watch?v=\\1&\\2" },
+      { hosts: ["youtube.com", "www.youtube.com", "m.youtube.com"], path: "(.*)", to: "/\\1" },
+      { hosts: ["youtu.be"], path: "([^?#]+)\\??([^#]*)", to: "/watch?v=\\1&\\2" },
     ],
     skip: ["account", "upload", "signin", "logout", "premium", "paid_memberships", "channel_switcher", "redirect", "t", "howyoutubeworks"],
   },
@@ -89,7 +109,7 @@ export const SERVICES = [
     domains: ["imgur.com"],
     origin: "https://imgur.com",
     probePath: "/",
-    redirects: [{ regex: "^https?://(?:www\\.|m\\.|i\\.)?imgur\\.com/(.*)$", to: "/\\1" }],
+    redirects: [{ hosts: ["imgur.com", "www.imgur.com", "m.imgur.com", "i.imgur.com"], path: "(.*)", to: "/\\1" }],
     skip: ["upload", "signin", "register", "account", "emerald"],
   },
 ];

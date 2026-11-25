@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# Builds the iPhone app and sends it to TestFlight. Runs on macOS with Xcode and xcodegen.
+#
+#   scripts/testflight build      archive and export build/Sidedoor.ipa, signed for the App Store
+#   scripts/testflight validate   check build/Sidedoor.ipa with App Store Connect
+#   scripts/testflight upload     upload build/Sidedoor.ipa to TestFlight
+#
+# Signing files come from $SIDEDOOR_SIGNING_DIR (default ~/.config/sidedoor/signing):
+# distribution.p12, distribution.p12.password, Sidedoor.mobileprovision,
+# SidedoorExtension.mobileprovision and AuthKey_$ASC_KEY_ID.p8. validate and upload read
+# ASC_KEY_ID and ASC_ISSUER_ID.
+set -euo pipefail
+
+root=$(cd "$(dirname "$0")/.." && pwd)
+signing=${SIDEDOOR_SIGNING_DIR:-$HOME/.config/sidedoor/signing}
+build=$root/safari/build
+ipa=$build/Sidedoor.ipa
+
+work=
+keychain=
+user_keychains=()
+
+cleanup() {
+  if [[ -n $keychain ]]; then
+    security list-keychains -d user -s "${user_keychains[@]}"
+    security delete-keychain "$keychain" 2>/dev/null || true
+  fi
+  [[ -z $work ]] || rm -rf "$work"
+}
+
+# Puts the distribution identity in a throwaway keychain, so nothing is left in the login keychain.
+use_signing_keychain() {
+  local line password
+  while IFS= read -r line; do
+    user_keychains+=("$(sed -E 's/^[[:space:]]*"(.*)"$/\1/' <<<"$line")")
+  done < <(security list-keychains -d user)
+  password=$(uuidgen)
+  keychain=$work/signing.keychain-db
+  security create-keychain -p "$password" "$keychain"
+  security set-keychain-settings -lut 3600 "$keychain"
+  security unlock-keychain -p "$password" "$keychain"
+  security import "$signing/distribution.p12" -k "$keychain" \
+    -P "$(cat "$signing/distribution.p12.password")" -T /usr/bin/codesign >/dev/null
+  security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain" >/dev/null
+  security list-keychains -d user -s "$keychain" "${user_keychains[@]}"
+  # Over plain ssh the identity's chain never verifies; run inside the logged-in user's session:
+  #   sudo launchctl asuser "$(id -u)" sudo -u "$USER" scripts/testflight build
+  security find-identity -v -p codesigning "$keychain" | grep -q "Apple Distribution" ||
+    { echo "no valid Apple Distribution identity; over ssh, run through launchctl asuser" >&2; exit 1; }
+}
+
+install_profiles() {
+  local profile uuid dir
+  for profile in "$signing"/Sidedoor.mobileprovision "$signing"/SidedoorExtension.mobileprovision; do
+    uuid=$(security cms -D -k "$keychain" -i "$profile" | plutil -extract UUID raw -)
+    for dir in "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"; do
+      mkdir -p "$dir"
+      cp "$profile" "$dir/$uuid.mobileprovision"
+    done
+  done
+}
+
+build() {
+  local version
+  work=$(mktemp -d)
+  trap cleanup EXIT
+  use_signing_keychain
+  install_profiles
+  version=$(plutil -extract version raw "$root/manifest.json")
+  (cd "$root/safari" && xcodegen generate --quiet)
+  rm -rf "$build/Sidedoor.xcarchive" "$ipa"
+  # TestFlight needs a new build number for every upload of the same version.
+  xcodebuild archive -quiet -project "$root/safari/Sidedoor.xcodeproj" -scheme Sidedoor \
+    -configuration Release -destination generic/platform=iOS -archivePath "$build/Sidedoor.xcarchive" \
+    MARKETING_VERSION="$version" CURRENT_PROJECT_VERSION="$(date -u +%Y%m%d%H%M)" \
+    OTHER_CODE_SIGN_FLAGS="--keychain $keychain"
+  cat >"$work/export.plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>method</key><string>app-store-connect</string>
+  <key>teamID</key><string>RZRH5QZCC6</string>
+  <key>signingStyle</key><string>manual</string>
+  <key>signingCertificate</key><string>Apple Distribution</string>
+  <key>provisioningProfiles</key><dict>
+    <key>com.scowalt.sidedoor</key><string>Sidedoor App Store</string>
+    <key>com.scowalt.sidedoor.extension</key><string>Sidedoor Extension App Store</string>
+  </dict>
+</dict></plist>
+PLIST
+  xcodebuild -exportArchive -quiet -archivePath "$build/Sidedoor.xcarchive" \
+    -exportOptionsPlist "$work/export.plist" -exportPath "$work/export"
+  mv "$work/export/Sidedoor.ipa" "$ipa"
+  echo "built $ipa (version $version)"
+}
+
+submit() {
+  xcrun altool "$1" -f "$ipa" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID" \
+    --p8-file-path "$signing/AuthKey_$ASC_KEY_ID.p8"
+}
+
+case ${1:-} in
+  build) build ;;
+  validate) submit --validate-app ;;
+  upload) submit --upload-app ;;
+  *) sed -n '2,13p' "$0" >&2; exit 2 ;;
+esac

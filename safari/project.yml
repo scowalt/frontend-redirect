@@ -1,0 +1,94 @@
+name: Sidedoor
+options:
+  deploymentTarget:
+    iOS: "18.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    DEVELOPMENT_TEAM: RZRH5QZCC6
+    CODE_SIGN_STYLE: Manual
+targets:
+  Sidedoor:
+    type: application
+    platform: iOS
+    sources:
+      - App
+    dependencies:
+      - target: Extension
+    info:
+      path: build/App-Info.plist
+      properties:
+        CFBundleDisplayName: Sidedoor
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.scowalt.sidedoor
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      configs:
+        Release:
+          "CODE_SIGN_IDENTITY[sdk=iphoneos*]": Apple Distribution
+          PROVISIONING_PROFILE_SPECIFIER: Sidedoor App Store
+  Extension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Extension
+      - path: ../manifest.json
+        buildPhase: resources
+      - path: ../src
+        type: folder
+        buildPhase: resources
+      - path: ../popup
+        type: folder
+        buildPhase: resources
+      - path: ../icons
+        type: folder
+        buildPhase: resources
+    info:
+      path: build/Extension-Info.plist
+      properties:
+        CFBundleDisplayName: Sidedoor
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.Safari.web-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
+    settings:
+      base:
+        PRODUCT_NAME: Sidedoor Extension
+        PRODUCT_BUNDLE_IDENTIFIER: com.scowalt.sidedoor.extension
+      configs:
+        Release:
+          "CODE_SIGN_IDENTITY[sdk=iphoneos*]": Apple Distribution
+          PROVISIONING_PROFILE_SPECIFIER: Sidedoor Extension App Store
+  UITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - UITests
+    dependencies:
+      - target: Sidedoor
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.scowalt.sidedoor.uitests
+        TEST_TARGET_NAME: Sidedoor
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Sidedoor:
+    build:
+      targets:
+        Sidedoor: all
+        UITests: [test]
+    test:
+      targets:
+        - UITests
