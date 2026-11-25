@@ -1,0 +1,82 @@
+name: Sidedoor
+options:
+  deploymentTarget:
+    iOS: "18.0"
+settings:
+  base:
+    MARKETING_VERSION: "0.1.1"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "6.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    DEVELOPMENT_TEAM: RZRH5QZCC6
+    CODE_SIGN_STYLE: Manual
+targets:
+  Sidedoor:
+    type: application
+    platform: iOS
+    sources:
+      - App
+    dependencies:
+      - target: Extension
+    info:
+      path: build/App-Info.plist
+      properties:
+        CFBundleDisplayName: Sidedoor
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        ITSAppUsesNonExemptEncryption: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.scowalt.sidedoor
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+  Extension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Extension
+      - path: ../manifest.json
+        buildPhase: resources
+      - path: ../src
+        type: folder
+        buildPhase: resources
+      - path: ../popup
+        type: folder
+        buildPhase: resources
+      - path: ../icons
+        type: folder
+        buildPhase: resources
+    info:
+      path: build/Extension-Info.plist
+      properties:
+        CFBundleDisplayName: Sidedoor
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.Safari.web-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SafariWebExtensionHandler
+    settings:
+      base:
+        PRODUCT_NAME: Sidedoor Extension
+        PRODUCT_BUNDLE_IDENTIFIER: com.scowalt.sidedoor.extension
+  UITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - UITests
+    dependencies:
+      - target: Sidedoor
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.scowalt.sidedoor.uitests
+        TEST_TARGET_NAME: Sidedoor
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Sidedoor:
+    build:
+      targets:
+        Sidedoor: all
+        UITests: [test]
+    test:
+      targets:
+        - UITests

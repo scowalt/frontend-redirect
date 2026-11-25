@@ -88,18 +88,20 @@ export function buildRules(active) {
         priority: 2,
         action: { type: "allow" },
         condition: {
-          regexFilter: `^https?://[^/]+/${path}(?:[/?#]|$)`,
+          regexFilter: `^https?://[^/]+/${path}([/?#].*)?$`,
           requestDomains: service.domains,
           resourceTypes: ["main_frame"],
         },
       });
     }
-    for (const { regex, to } of service.redirects) {
-      rules.push({
-        priority: 1,
-        action: { type: "redirect", redirect: { regexSubstitution: instance + to } },
-        condition: { regexFilter: regex, resourceTypes: ["main_frame"] },
-      });
+    for (const { hosts, path, to } of service.redirects) {
+      for (const host of hosts) {
+        rules.push({
+          priority: 1,
+          action: { type: "redirect", redirect: { regexSubstitution: instance + to } },
+          condition: { regexFilter: `^https?://${host.replaceAll(".", "\\.")}/${path}`, resourceTypes: ["main_frame"] },
+        });
+      }
     }
   }
   return rules.map((rule, i) => ({ id: i + 1, ...rule }));

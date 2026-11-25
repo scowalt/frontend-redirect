@@ -56,8 +56,21 @@ test("leaves login, settings and other unsupported pages alone", () => {
     "https://www.instagram.com/explore/tags/cats/",
     "https://unrelated.example/x.com/jack",
     "https://notreddit.com/r/linux",
+    "https://help.x.com/en",
   ]) {
     assert.equal(navigate(url), url, url);
+  }
+});
+
+test("every rule regex uses only syntax Safari accepts", () => {
+  // Safari compiles declarativeNetRequest regexes with WebKit's content blocker parser
+  // (URLFilterParser.cpp), which rejects these and drops the whole rule update.
+  const unsupported = { alternation: /\|/, "counted repetition": /\{\d/, "\\d, \\w, \\s or \\b": /\\[dDwWsSbB]/, lookaround: /\(\?[=!<]/ };
+  const rules = buildRules(Object.fromEntries(SERVICES.map((s) => [s.id, INSTANCE])));
+  for (const { condition } of rules) {
+    for (const [name, pattern] of Object.entries(unsupported)) {
+      assert.doesNotMatch(condition.regexFilter, pattern, `${condition.regexFilter} uses ${name}`);
+    }
   }
 });
 

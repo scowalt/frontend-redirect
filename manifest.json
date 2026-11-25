@@ -3,7 +3,7 @@
   "name": "Sidedoor",
   "version": "0.1.1",
   "description": "Lets you into X, Reddit and Instagram through Nitter, Redlib and Kittygram, and keeps track of which instances are open.",
-  "permissions": ["declarativeNetRequest", "storage", "alarms"],
+  "permissions": ["declarativeNetRequest", "declarativeNetRequestWithHostAccess", "storage", "alarms"],
   "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "src/background.js", "type": "module" },
   "action": {
