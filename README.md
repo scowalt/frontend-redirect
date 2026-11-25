@@ -23,6 +23,13 @@ Until then, or to run the latest `main`:
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and select the folder.
 
+### iPhone and iPad (Safari)
+
+The same extension runs in Safari through a small app, `safari/`, delivered with TestFlight.
+After installing the app, open **Settings → Apps → Safari → Extensions → Sidedoor**, turn on
+**Allow Extension**, and set **All Websites** to **Allow**. The popup is under the page menu
+(the button left of the address) → **Sidedoor**.
+
 ## How it works
 
 - **Instance list.** The extension fetches LibRedirect's public list
@@ -68,6 +75,30 @@ To release, raise `version` in `manifest.json` and push to `main`. See [PUBLISHI
 CI runs `npm test` and `npm run test:rules` on every push and pull request. `npm run e2e`
 depends on public instances that often go down, so it runs on a weekly schedule in the
 **Live instances** workflow instead. You can also start that workflow manually.
+
+### Safari app
+
+On a Mac with Xcode and `xcodegen`:
+
+```sh
+cd safari && xcodegen generate   # Sidedoor.xcodeproj; bundles manifest.json, src, popup, icons
+xcodebuild test -project Sidedoor.xcodeproj -scheme Sidedoor \
+  -destination 'platform=iOS Simulator,name=iPhone 17'
+```
+
+The UI test turns the extension on in the simulator's Settings, opens `x.com/jack`, checks it
+lands on a Nitter instance, and that **Open on x.com** goes back. Use a simulator that has
+booted before: on a freshly erased one, Settings doesn't list Safari yet.
+
+`scripts/testflight build`, `validate` and `upload` archive the app, sign it for the App Store
+and send it to TestFlight. Signing files live in `~/.config/sidedoor/signing`; the script's
+header lists them. Over ssh, run it inside the logged-in user's session with
+`sudo launchctl asuser "$(id -u)" sudo -u "$USER" scripts/testflight build`, because the
+signing identity doesn't verify outside it.
+
+Safari differs from Chrome in two ways the rules depend on: its `regexFilter` rejects
+alternation (`a|b`), lookaround and `\d \w \s` (a unit test checks every rule), and it applies
+redirects only with the `declarativeNetRequestWithHostAccess` permission.
 
 The browser tests use `CHROME_PATH`. If `CHROME_PATH` is not set, they use the newest Chromium build
 already downloaded by Playwright. Run `npx playwright install chromium` if you have none.
