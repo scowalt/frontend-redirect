@@ -127,3 +127,9 @@ test("instance URLs and links back to the original site", () => {
     "https://www.reddit.com/r/linux?sort=top#c",
   );
 });
+
+test("the manifest description fits App Store Connect's 112-character limit for Safari extensions", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const { description } = JSON.parse(await readFile(new URL("../manifest.json", import.meta.url), "utf8"));
+  assert.ok(description.length <= 112, `${description.length} characters`);
+});
